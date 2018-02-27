@@ -4,10 +4,10 @@
 
 from binaryninja import PluginCommand
 
-from modules import simple_sweep
+from modules import simple_report
 
 # register plugin
 PluginCommand.register_for_function(
   "[Sweeper] Simple report",
   "Seach binary for defined signatures",
-  simple_sweep.run_plugin)
+  simple_report.run_plugin)
