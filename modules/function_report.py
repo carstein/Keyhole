@@ -71,7 +71,7 @@ class Report:
                                   }
 
   def generate_html(self):
-    html = Template(self.templates['simple_report.html'])
+    html = Template(self.templates['functions_report.html'])
     table = ''
 
     for name, data in sorted(self.function_data.iteritems(), reverse=True, key=lambda x: x[1]['instructions']):
