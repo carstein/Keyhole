@@ -27,7 +27,7 @@ class Report:
   def __get_function_row(self, name, data):
     template = '''
     <tr class={size}>
-    <td class='f_name'>0x{start:x}: {name}</td>
+    <td>0x{start:0{w}x}: {name}</td>
     <td>{instructions}</td>
     <td>{blocks}</td>
     <td>{calls}</td>
@@ -40,7 +40,8 @@ class Report:
                            blocks = data['blocks'],
                            calls = data['calls'],
                            xrefs = data['xrefs'],
-                           size = data['size'])
+                           size = data['size'],
+                           w = self.bv.arch.address_size*2)
 
   def add_function(self, f):
     bn.log_info('[+] Adding function')
@@ -98,4 +99,8 @@ def run_plugin(bv, function):
     if function.symbol.type != bn.SymbolType.ImportedFunctionSymbol:
       r.add_function(function)
 
-  bn.interaction.show_html_report('Functions report', r.generate_html(), 'Not available')
+  save_filename = bn.interaction.get_save_filename_input("Save report to ...")
+  with open(save_filename, "w+") as fh:
+    fh.write(r.generate_html())
+
+  #bn.interaction.show_html_report('Functions report', r.generate_html(), 'Not available')

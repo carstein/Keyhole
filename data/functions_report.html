@@ -2,15 +2,54 @@
 <head>
   <style>
   body {
-    font-family: 'Droid Sans';
-    font-size: 1.2em;
+    font-family: 'Droid Sans Mono';
+    font-size: 1em;
     margin-left: 2em;
     margin-top: 2em;
   }
 
-  table {
-    padding: 2px;
-    align-items: center;
+  .function_table {
+    border: 1px solid black;
+    border-spacing:0;
+    border-collapse: collapse;
+  }
+
+  .function_table thead th {
+    background-color: #d7e0ef;
+    border: solid 1px #d7e0ef;
+    color: black;
+    padding: 10px;
+    text-align: center;
+    text-shadow: 1px 1px 1px #fff;
+  }
+
+  .function_table tbody td {
+    border: solid 1px #d7e0ef;
+    border-left: none;
+    border-right: none;
+    color: black;
+    padding: 5px;
+    text-align: center;
+  }
+
+  .function_table tbody td:first-child {
+    text-align: left;
+  }
+
+  .function_table tbody tr:hover {
+    background-color: #e6e6e6;
+  }
+
+  .large {
+    border-left: 5px solid red;
+  }
+
+  .medium {
+    border-left: 5px solid orange;
+  }
+
+  .small {
+    border-left: 5px solid green;
   }
   </style>
 </head>
@@ -19,15 +58,19 @@
   Number of functions in total: $f_number
   </p>
   <p>
-    <table>
-      <tr class='head'>
-        <th>Function name</th>
-        <th>Instructions</th>
-        <th>Blocks</th>
-        <th>Function calls</th>
-        <th>XREFS</th>
-      </tr>
-      $f_table
+    <table  class="function_table">
+      <thead>
+        <tr>
+          <th>Function name</th>
+          <th>Instructions</th>
+          <th>Blocks</th>
+          <th>Function calls</th>
+          <th>XREFS</th>
+        </tr>
+      </thead>
+      <tbody>
+        $f_table
+      </tbody>
     </table>
   </p>
 </body>
