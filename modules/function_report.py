@@ -5,6 +5,9 @@ import os
 import binaryninja as bn
 
 
+# It does not end with /
+PLUGINDIR_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
 supported_arch = [
   'linux-x86',
   'linux-x86_64'
@@ -72,7 +75,9 @@ class Report:
                        f_table = table)
 
   def load_template(self, name, template):
-    with open(bn.user_plugin_path + '/keyhole/data/' + template) as fh:
+    template_path = PLUGINDIR_PATH + "/data/" + template
+
+    with open(template_path) as fh:
       self.templates[name] = fh.read()
 
 def run_plugin(bv, function):
