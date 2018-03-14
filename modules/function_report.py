@@ -4,7 +4,6 @@
 import os
 import binaryninja as bn
 
-from string import Template
 
 supported_arch = [
   'linux-x86',
@@ -25,15 +24,7 @@ class Report:
     }
 
   def __get_function_row(self, name, data):
-    template = '''
-    <tr class={size}>
-    <td>0x{start:0{w}x}: {name}</td>
-    <td>{instructions}</td>
-    <td>{blocks}</td>
-    <td>{calls}</td>
-    <td>{xrefs}</td>
-    </tr>
-    '''
+    template = self.templates['function_row']
     return template.format(start = data['start'],
                            name = name,
                            instructions = data['instructions'],
@@ -44,7 +35,6 @@ class Report:
                            w = self.bv.arch.address_size*2)
 
   def add_function(self, f):
-    bn.log_info('[+] Adding function')
     b, i, c = 0, 0, 0
     x = len(self.bv.get_code_refs(f.start))
 
@@ -72,18 +62,18 @@ class Report:
                                   }
 
   def generate_html(self):
-    html = Template(self.templates['functions_report.html'])
+    html = self.templates['main']
     table = ''
 
     for name, data in sorted(self.function_data.iteritems(), reverse=True, key=lambda x: x[1]['instructions']):
       table = table + self.__get_function_row(name, data)
 
-    return html.substitute(f_number = len(self.function_data.keys()),
-                           f_table = table)
+    return html.format(f_number = len(self.function_data.keys()),
+                       f_table = table)
 
-  def load_template(self, template):
+  def load_template(self, name, template):
     with open(bn.user_plugin_path + '/keyhole/data/' + template) as fh:
-      self.templates[template] = fh.read()
+      self.templates[name] = fh.read()
 
 def run_plugin(bv, function):
   # Supported platform check
@@ -92,7 +82,8 @@ def run_plugin(bv, function):
     return -1
 
   r = Report(bv)
-  r.load_template('functions_report.html')
+  r.load_template('main','functions_report.html')
+  r.load_template('function_row', 'function_table_row.tpl')
 
   bn.log_info('[*] Scanning functions...')
   for function in bv.functions:
@@ -100,7 +91,9 @@ def run_plugin(bv, function):
       r.add_function(function)
 
   save_filename = bn.interaction.get_save_filename_input("Save report to ...")
-  with open(save_filename, "w+") as fh:
-    fh.write(r.generate_html())
+
+  if save_filename:
+    with open(save_filename, "w+") as fh:
+      fh.write(r.generate_html())
 
   #bn.interaction.show_html_report('Functions report', r.generate_html(), 'Not available')
