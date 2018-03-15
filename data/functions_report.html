@@ -1,11 +1,35 @@
 <html>
 <head>
+  <script>
+  function show_pane(name){{
+    // hide all
+    hide_all_panes();
+
+    // get element and change display
+    el = document.getElementById(name);
+    el.style.display = "block";
+  }};
+
+  function hide_all_panes() {{
+    panes = document.getElementsByClassName('pane');
+
+    for (i = 0; i < panes.length; i++ ) {{
+      panes.item(i).style.display = 'none';
+    }};
+  }}
+  </script>
+
   <style>
   body {{
     font-family: 'Droid Sans Mono';
     font-size: 1em;
     margin-left: 2em;
     margin-top: 2em;
+    display: flex;
+  }}
+
+  .column {{
+    flex: auto;
   }}
 
   .function_table {{
@@ -15,8 +39,8 @@
   }}
 
   .function_table thead th {{
-    background-color: #d7e0ef;
-    border: solid 1px #d7e0ef;
+    background-color: #33adff;
+    border: solid 1px #33adff;
     color: black;
     padding: 10px;
     text-align: center;
@@ -24,7 +48,7 @@
   }}
 
   .function_table tbody td {{
-    border: solid 1px #d7e0ef;
+    border: solid 1px #33adff;
     border-left: none;
     border-right: none;
     color: black;
@@ -38,6 +62,39 @@
 
   .function_table tbody tr:hover {{
     background-color: #e6e6e6;
+  }}
+
+  .pane {{
+    display: none;
+  }}
+
+  .function_pane {{
+    border: 1px solid black;
+    border-spacing:0;
+    border-collapse: collapse;
+    margin-bottom: 2em;
+  }}
+
+  .function_pane thead th {{
+    background-color: #b3e0ff;
+    border: solid 1px #b3e0ff;
+    color: black;
+    padding: 10px;
+    text-align: center;
+    text-shadow: 1px 1px 1px #fff;
+  }}
+
+  .function_pane tbody td {{
+    border: solid 1px #b3e0ff;
+    border-left: none;
+    border-right: none;
+    color: black;
+    padding: 5px;
+    text-align: center;
+  }}
+
+  .function_pane tbody td:first-child {{
+    text-align: left;
   }}
 
   .large {{
@@ -54,9 +111,7 @@
   </style>
 </head>
 <body>
-  <p>
-  Number of functions in total: {f_number}
-  </p>
+<div class="column">
   <p>
     <table  class="function_table">
       <thead>
@@ -73,5 +128,11 @@
       </tbody>
     </table>
   </p>
+</div>
+<div class="column">
+  <p>
+    {f_panes}
+  </p>
+</div>
 </body>
 </html>

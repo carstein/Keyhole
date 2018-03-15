@@ -21,8 +21,8 @@ class Report:
     # 'function_name': {'start':0x08040000,
     #                   'blocks':10,
     #                   'instructions': 50,
-    #                   'calls': 5, // how many other functions are being called
-    #                   'xrefs': 2, // how many functions call this function
+    #                   'calls': [<call_instr>], // how many other functions are being called
+    #                   'xrefs': [<ref>], // how many functions call this function
     #                   'size': 'small'}
     }
 
@@ -32,21 +32,47 @@ class Report:
                            name = name,
                            instructions = data['instructions'],
                            blocks = data['blocks'],
-                           calls = data['calls'],
-                           xrefs = data['xrefs'],
+                           calls = len(data['calls']),
+                           xrefs = len(data['xrefs']),
                            size = data['size'],
                            w = self.bv.arch.address_size*2)
 
+  def __extract_call_target(self, instr):
+    if instr.dest.operation == bn.LowLevelILOperation.LLIL_CONST_PTR:
+      addr = instr.dest.constant
+      return addr, self.bv.get_function_at(addr).name
+    else:
+      return 0, "[{}]".format(instr.dest)
+
+  def __get_function_pane(self, name, data):
+    template = self.templates['function_pane']
+    xref_rows = ''
+
+    for xref in data['xrefs']:
+      xref_rows += self.templates['function_xref_row'].format(addr = xref.address,
+                                                              name = xref.function.name,
+                                                              w = self.bv.arch.address_size*2)
+    calls_rows = ''
+    for call in data['calls']:
+      call_addr, call_name = self.__extract_call_target(call)
+      calls_rows += self.templates['function_call_row'].format(addr = call_addr,
+                                                               name = call_name,
+                                                               w = self.bv.arch.address_size*2)
+
+    return template.format(id = name,
+                           calls_rows = calls_rows,
+                           xref_rows = xref_rows)
+
   def add_function(self, f):
-    b, i, c = 0, 0, 0
-    x = len(self.bv.get_code_refs(f.start))
+    b, i  = 0, 0
+    c = []
 
     for block in f.low_level_il:
       b += 1
       for inst in block:
         i += 1
         if inst.operation == bn.LowLevelILOperation.LLIL_CALL:
-          c += 1
+          c.append(inst)
 
     # naivly determine function size
     if b == 1 or i < 10:
@@ -60,25 +86,28 @@ class Report:
                                   'blocks': b,
                                   'instructions': i,
                                   'calls': c,
-                                  'xrefs': x,
+                                  'xrefs': self.bv.get_code_refs(f.start),
                                   'size': size
                                   }
-
-  def generate_html(self):
-    html = self.templates['main']
-    table = ''
-
-    for name, data in sorted(self.function_data.iteritems(), reverse=True, key=lambda x: x[1]['instructions']):
-      table = table + self.__get_function_row(name, data)
-
-    return html.format(f_number = len(self.function_data.keys()),
-                       f_table = table)
 
   def load_template(self, name, template):
     template_path = PLUGINDIR_PATH + "/data/" + template
 
     with open(template_path) as fh:
       self.templates[name] = fh.read()
+
+  def generate_html(self):
+    html = self.templates['main']
+    f_table = ''
+    panes = ''
+
+    for name, data in sorted(self.function_data.iteritems(), reverse=True, key=lambda x: x[1]['instructions']):
+      f_table += self.__get_function_row(name, data)
+      panes   += self.__get_function_pane(name, data)
+
+    return html.format(f_number = len(self.function_data.keys()),
+                       f_table = f_table,
+                       f_panes = panes)
 
 def run_plugin(bv, function):
   # Supported platform check
@@ -89,6 +118,9 @@ def run_plugin(bv, function):
   r = Report(bv)
   r.load_template('main','functions_report.html')
   r.load_template('function_row', 'function_table_row.tpl')
+  r.load_template('function_pane', 'function_pane.tpl')
+  r.load_template('function_call_row', 'function_call_row.tpl')
+  r.load_template('function_xref_row', 'function_xref_row.tpl')
 
   bn.log_info('[*] Scanning functions...')
   for function in bv.functions:
@@ -100,5 +132,3 @@ def run_plugin(bv, function):
   if save_filename:
     with open(save_filename, "w+") as fh:
       fh.write(r.generate_html())
-
-  #bn.interaction.show_html_report('Functions report', r.generate_html(), 'Not available')
