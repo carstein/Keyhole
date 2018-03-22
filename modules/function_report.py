@@ -4,6 +4,8 @@
 import os
 import binaryninja as bn
 
+from fingerprint import FingerprintReport
+
 
 # It does not end with /
 PLUGINDIR_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -23,6 +25,7 @@ class Report:
     #                   'instructions': 50,
     #                   'calls': [<call_instr>], // how many other functions are being called
     #                   'xrefs': [<ref>], // how many functions call this function
+    #                   'fingerprint: <image>,' //Image of binary fingerprint
     #                   'size': 'small'}
     }
 
@@ -59,20 +62,29 @@ class Report:
                                                                name = call_name,
                                                                w = self.bv.arch.address_size*2)
 
+    fingerprint_image = self.templates['fingerprint'].format(img = data['fingerprint'])
     return template.format(id = name,
                            calls_rows = calls_rows,
-                           xref_rows = xref_rows)
+                           xref_rows = xref_rows,
+                           img = fingerprint_image)
 
   def add_function(self, f):
     b, i  = 0, 0
     c = []
 
+    # Basic data
     for block in f.low_level_il:
       b += 1
       for inst in block:
         i += 1
         if inst.operation == bn.LowLevelILOperation.LLIL_CALL:
           c.append(inst)
+
+    # Binary fingerprint
+    fingerprint = FingerprintReport()
+
+    for inst in f.instructions:
+      fingerprint.add(inst[0][0].text)
 
     # naivly determine function size
     if b == 1 or i < 10:
@@ -87,7 +99,8 @@ class Report:
                                   'instructions': i,
                                   'calls': c,
                                   'xrefs': self.bv.get_code_refs(f.start),
-                                  'size': size
+                                  'size': size,
+                                  'fingerprint': fingerprint.create_image()
                                   }
 
   def load_template(self, name, template):
@@ -121,6 +134,7 @@ def run_plugin(bv, function):
   r.load_template('function_pane', 'function_pane.tpl')
   r.load_template('function_call_row', 'function_call_row.tpl')
   r.load_template('function_xref_row', 'function_xref_row.tpl')
+  r.load_template('fingerprint', 'fingerprint_image.tpl')
 
   bn.log_info('[*] Scanning functions...')
   for function in bv.functions:
