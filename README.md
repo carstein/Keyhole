@@ -22,7 +22,7 @@ In side pane user is presented with detailed list of functions given function ca
 ![Function Pane](https://i.imgur.com/Acvqktp.png)
 
 ### Binary fingerprint
-Ueer is presented with an image draw using hilberts curve that displays type of instructions in a given binary. Such view might help reverse to spot certain characteristics like dense clusters of arthemetic or data operations.
+Ueer is presented with an image draw using hilberts curve that displays type of instructions in a given function. Such view might help reverser to spot certain characteristics like dense clusters of arthemetic or data operations.
 
 ![Fingerprint](https://i.imgur.com/nMxP8AP.png)
 
