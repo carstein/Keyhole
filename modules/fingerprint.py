@@ -16,17 +16,17 @@ scale = [(4,     2, 160), # elements, N-hilbert, size
 
 color = {0:'#F9DEC9',
          1:'#33ADFF',
-         2:'#3A405A',
+         2:'#56E39F',
          3:'#383D3B',
          4:'#E3170A'}
 
 
 class FingerprintReport:
   t = [
-        (['mov', 'lea', 'pop','push', 'movzx', 'movsxd'], 1),
+        (['mov', 'lea', 'pop','push', 'movzx', 'movsxd', 'cmovne'], 1),
         ([],2),
-        (['and','xor','add', 'sub','mul','div', 'sar', 'shr', 'not'], 3),
-        (['call', 'cmp', 'jle', 'ja','jg', 'jbe', 'test', 'je', 'jne', 'jmp', 'jl', 'jge'], 4),
+        (['or', 'and','xor','add', 'sub','mul','div', 'sar', 'shr', 'not', 'cmp', 'test'], 3),
+        (['call', 'jle', 'ja', 'jg', 'jbe', 'je', 'jne', 'jmp', 'jl', 'jge', 'ret', 'retn'], 4),
       ]
 
   def __init__(self):
