@@ -77,7 +77,7 @@ class Report:
       b += 1
       for inst in block:
         i += 1
-        if inst.operation == bn.LowLevelILOperation.LLIL_CALL:
+        if inst.operation in [bn.LowLevelILOperation.LLIL_CALL, bn.LowLevelILOperation.LLIL_CALL_STACK_ADJUST, bn.LowLevelILOperation.LLIL_TAILCALL]:
           c.append(inst)
 
     # Binary fingerprint
